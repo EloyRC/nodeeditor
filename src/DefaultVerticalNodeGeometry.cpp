@@ -32,7 +32,8 @@ void DefaultVerticalNodeGeometry::recomputeSize(NodeId const nodeId) const
 {
     unsigned int height = _portSpasing; // maxHorizontalPortsExtent(nodeId);
 
-    if (auto w = _graphModel.nodeData<QWidget *>(nodeId, NodeRole::Widget)) {
+    auto w = _graphModel.nodeData<QWidget *>(nodeId, NodeRole::Widget);
+    if (_embeddedWidgetEnabled && w) {
         height = std::max(height, static_cast<unsigned int>(w->height()));
     }
 
@@ -64,12 +65,13 @@ void DefaultVerticalNodeGeometry::recomputeSize(NodeId const nodeId) const
 
     unsigned int width = std::max(totalInPortsWidth, totalOutPortsWidth);
 
-    if (auto w = _graphModel.nodeData<QWidget *>(nodeId, NodeRole::Widget)) {
+    if (_embeddedWidgetEnabled && w) {
         width = std::max(width, static_cast<unsigned int>(w->width()));
     }
 
     width = std::max(width, static_cast<unsigned int>(capRect.width()));
 
+    width += _portSpasing;
     width += _portSpasing;
     width += _portSpasing;
 
@@ -177,7 +179,8 @@ QPointF DefaultVerticalNodeGeometry::widgetPosition(NodeId const nodeId) const
 
     unsigned int captionHeight = captionRect(nodeId).height();
 
-    if (auto w = _graphModel.nodeData<QWidget *>(nodeId, NodeRole::Widget)) {
+    auto w = _graphModel.nodeData<QWidget *>(nodeId, NodeRole::Widget);
+    if (_embeddedWidgetEnabled && w) {
         // If the widget wants to use as much vertical space as possible,
         // place it immediately after the caption.
         if (w->sizePolicy().verticalPolicy() & QSizePolicy::ExpandFlag) {
@@ -197,6 +200,15 @@ QRect DefaultVerticalNodeGeometry::resizeHandleRect(NodeId const nodeId) const
     unsigned int rectSize = 7;
 
     return QRect(size.width() - rectSize, size.height() - rectSize, rectSize, rectSize);
+}
+
+QRect DefaultVerticalNodeGeometry::enableWidgetHandleRect(NodeId const nodeId) const
+{
+    QSize size = _graphModel.nodeData<QSize>(nodeId, NodeRole::Size);
+
+    unsigned int rectSize = 7;
+
+    return QRect(size.width() - rectSize, size.height() - (rectSize * 2), rectSize, rectSize);
 }
 
 QRectF DefaultVerticalNodeGeometry::portTextRect(NodeId const nodeId,

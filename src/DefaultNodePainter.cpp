@@ -32,6 +32,8 @@ void DefaultNodePainter::paint(QPainter *painter, NodeGraphicsObject &ngo) const
     drawEntryLabels(painter, ngo);
 
     drawResizeRect(painter, ngo);
+
+    drawEnableWidgetRect(painter, ngo);
 }
 
 void DefaultNodePainter::drawNodeRect(QPainter *painter, NodeGraphicsObject &ngo) const
@@ -268,6 +270,19 @@ void DefaultNodePainter::drawResizeRect(QPainter *painter, NodeGraphicsObject &n
 
         painter->drawEllipse(geometry.resizeHandleRect(nodeId));
     }
+}
+
+void DefaultNodePainter::drawEnableWidgetRect(QPainter *painter, NodeGraphicsObject &ngo) const
+{
+    NodeId const nodeId = ngo.nodeId();
+    AbstractNodeGeometry &geometry = ngo.nodeScene()->nodeGeometry();
+
+    if(ngo.hasEmbeddedWidget())
+        painter->setBrush(Qt::red);
+    else
+        painter->setBrush(Qt::gray);
+        
+    painter->drawEllipse(geometry.enableWidgetHandleRect(nodeId));
 }
 
 } // namespace QtNodes

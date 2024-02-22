@@ -81,12 +81,15 @@ void NodeGraphicsObject::embedQWidget()
     AbstractNodeGeometry &geometry = nodeScene()->nodeGeometry();
     geometry.recomputeSize(_nodeId);
 
-    if (auto w = _graphModel.nodeData(_nodeId, NodeRole::Widget).value<QWidget *>()) {
+    auto w = _graphModel.nodeData(_nodeId, NodeRole::Widget).value<QWidget *>();
+    if (!_proxyWidget && w) {
         _proxyWidget = new QGraphicsProxyWidget(this);
 
         _proxyWidget->setWidget(w);
 
         _proxyWidget->setPreferredWidth(5);
+
+        geometry.setEnableEmbeddedWidget(true);
 
         geometry.recomputeSize(_nodeId);
 
@@ -105,6 +108,19 @@ void NodeGraphicsObject::embedQWidget()
 
         _proxyWidget->setOpacity(1.0);
         _proxyWidget->setFlag(QGraphicsItem::ItemIgnoresParentOpacity);
+    }
+}
+
+void NodeGraphicsObject::unEmbedQWidget()
+{
+    if(_proxyWidget) {
+        this->nodeScene()->removeItem(_proxyWidget);
+        _proxyWidget->setWidget(nullptr);
+        delete _proxyWidget;
+        _proxyWidget = nullptr;
+        AbstractNodeGeometry &geometry = nodeScene()->nodeGeometry();
+        geometry.setEnableEmbeddedWidget(false);
+        geometry.recomputeSize(_nodeId);
     }
 }
 
@@ -220,10 +236,22 @@ void NodeGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event)
         }
     }
 
+    auto pos = event->pos();
+
     if (_graphModel.nodeFlags(_nodeId) & NodeFlag::Resizable) {
-        auto pos = event->pos();
         bool const hit = geometry.resizeHandleRect(_nodeId).contains(QPoint(pos.x(), pos.y()));
         _nodeState.setResizing(hit);
+    }
+
+    if(geometry.enableWidgetHandleRect(_nodeId).contains(QPoint(pos.x(), pos.y()))) {
+        if(_proxyWidget)
+            unEmbedQWidget();
+        else
+            embedQWidget();
+
+        nodeScene()->nodeGeometry().recomputeSize(_nodeId);
+
+        Q_EMIT nodeScene()->toggleEnableNodeWidget(_nodeId);
     }
 
     QGraphicsObject::mousePressEvent(event);
@@ -247,8 +275,8 @@ void NodeGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
     if (_nodeState.resizing()) {
         auto diff = event->pos() - event->lastPos();
-
-        if (auto w = _graphModel.nodeData<QWidget *>(_nodeId, NodeRole::Widget)) {
+        auto w = _graphModel.nodeData<QWidget *>(_nodeId, NodeRole::Widget);
+        if (_proxyWidget && w) {
             prepareGeometryChange();
 
             auto oldSize = w->size();
@@ -359,5 +387,8 @@ void NodeGraphicsObject::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
     Q_EMIT nodeScene()->nodeContextMenu(_nodeId, mapToScene(event->pos()));
 }
+
+bool NodeGraphicsObject::hasEmbeddedWidget()
+{ return _proxyWidget != nullptr; }
 
 } // namespace QtNodes

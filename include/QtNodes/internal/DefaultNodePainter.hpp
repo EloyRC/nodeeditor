@@ -30,5 +30,7 @@ public:
     void drawEntryLabels(QPainter *painter, NodeGraphicsObject &ngo) const;
 
     void drawResizeRect(QPainter *painter, NodeGraphicsObject &ngo) const;
+
+    void drawEnableWidgetRect(QPainter *painter, NodeGraphicsObject &ngo) const;
 };
 } // namespace QtNodes

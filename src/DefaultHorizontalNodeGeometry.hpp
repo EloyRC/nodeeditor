@@ -34,6 +34,8 @@ public:
 
     QRect resizeHandleRect(NodeId const nodeId) const override;
 
+    QRect enableWidgetHandleRect(NodeId const nodeId) const override;
+
 private:
     QRectF portTextRect(NodeId const nodeId,
                         PortType const portType,

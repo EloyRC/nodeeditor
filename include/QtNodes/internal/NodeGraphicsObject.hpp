@@ -50,6 +50,8 @@ public:
     /// Repaints the node once with reacting ports.
     void reactToConnection(ConnectionGraphicsObject const *cgo);
 
+    bool hasEmbeddedWidget();
+
 protected:
     void paint(QPainter *painter,
                QStyleOptionGraphicsItem const *option,
@@ -75,6 +77,8 @@ protected:
 
 private:
     void embedQWidget();
+
+    void unEmbedQWidget();
 
     void setLockedState();
 

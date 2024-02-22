@@ -72,8 +72,16 @@ public:
 
     virtual QRect resizeHandleRect(NodeId const nodeId) const = 0;
 
+    virtual QRect enableWidgetHandleRect(NodeId const nodeId) const = 0;
+
+    void setEnableEmbeddedWidget(bool val)
+    { _embeddedWidgetEnabled = val; }
+
 protected:
     AbstractGraphModel &_graphModel;
+
+    bool _embeddedWidgetEnabled = true;
+
 };
 
 } // namespace QtNodes

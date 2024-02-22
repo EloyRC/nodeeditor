@@ -32,7 +32,8 @@ void DefaultHorizontalNodeGeometry::recomputeSize(NodeId const nodeId) const
 {
     unsigned int height = maxVerticalPortsExtent(nodeId);
 
-    if (auto w = _graphModel.nodeData<QWidget *>(nodeId, NodeRole::Widget)) {
+    auto w = _graphModel.nodeData<QWidget *>(nodeId, NodeRole::Widget);
+    if (_embeddedWidgetEnabled && w) {
         height = std::max(height, static_cast<unsigned int>(w->height()));
     }
 
@@ -42,13 +43,14 @@ void DefaultHorizontalNodeGeometry::recomputeSize(NodeId const nodeId) const
 
     height += _portSpasing; // space above caption
     height += _portSpasing; // space below caption
+    height += _portSpasing; // space for resize and enable widget
 
     unsigned int inPortWidth = maxPortsTextAdvance(nodeId, PortType::In);
     unsigned int outPortWidth = maxPortsTextAdvance(nodeId, PortType::Out);
 
     unsigned int width = inPortWidth + outPortWidth + 4 * _portSpasing;
 
-    if (auto w = _graphModel.nodeData<QWidget *>(nodeId, NodeRole::Widget)) {
+    if (_embeddedWidgetEnabled && w) {
         width += w->width();
     }
 
@@ -150,7 +152,8 @@ QPointF DefaultHorizontalNodeGeometry::widgetPosition(NodeId const nodeId) const
 
     unsigned int captionHeight = captionRect(nodeId).height();
 
-    if (auto w = _graphModel.nodeData<QWidget *>(nodeId, NodeRole::Widget)) {
+    auto w = _graphModel.nodeData<QWidget *>(nodeId, NodeRole::Widget);
+    if (_embeddedWidgetEnabled && w) {
         // If the widget wants to use as much vertical space as possible,
         // place it immediately after the caption.
         if (w->sizePolicy().verticalPolicy() & QSizePolicy::ExpandFlag) {
@@ -171,6 +174,15 @@ QRect DefaultHorizontalNodeGeometry::resizeHandleRect(NodeId const nodeId) const
     unsigned int rectSize = 7;
 
     return QRect(size.width() - _portSpasing, size.height() - _portSpasing, rectSize, rectSize);
+}
+
+QRect DefaultHorizontalNodeGeometry::enableWidgetHandleRect(NodeId const nodeId) const
+{
+    QSize size = _graphModel.nodeData<QSize>(nodeId, NodeRole::Size);
+
+    unsigned int rectSize = 7;
+
+    return QRect(size.width() - _portSpasing, size.height() - (_portSpasing * 2), rectSize, rectSize);
 }
 
 QRectF DefaultHorizontalNodeGeometry::portTextRect(NodeId const nodeId,
