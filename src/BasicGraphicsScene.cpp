@@ -72,8 +72,6 @@ BasicGraphicsScene::BasicGraphicsScene(AbstractGraphModel &graphModel, QObject *
             this,
             &BasicGraphicsScene::onNodeUpdated);
 
-    connect(this, &BasicGraphicsScene::toggleEnableNodeWidget, this, &BasicGraphicsScene::onNodeUpdated);
-
     connect(this, &BasicGraphicsScene::nodeClicked, this, &BasicGraphicsScene::onNodeClicked);
 
     connect(&_graphModel, &AbstractGraphModel::modelReset, this, &BasicGraphicsScene::onModelReset);

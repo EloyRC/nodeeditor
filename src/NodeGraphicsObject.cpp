@@ -83,6 +83,8 @@ void NodeGraphicsObject::embedQWidget()
 
     auto w = _graphModel.nodeData(_nodeId, NodeRole::Widget).value<QWidget *>();
     if (!_proxyWidget && w) {
+        w->show();
+
         _proxyWidget = new QGraphicsProxyWidget(this);
 
         _proxyWidget->setWidget(w);
@@ -244,14 +246,18 @@ void NodeGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event)
     }
 
     if(geometry.enableWidgetHandleRect(_nodeId).contains(QPoint(pos.x(), pos.y()))) {
-        if(_proxyWidget)
+        if(_proxyWidget) {
             unEmbedQWidget();
-        else
+            nodeScene()->graphModel().setNodeData(_nodeId, NodeRole::WidgetEnabled, false);
+        }
+        else {
+            nodeScene()->graphModel().setNodeData(_nodeId, NodeRole::WidgetEnabled, true);
             embedQWidget();
+        }
 
         nodeScene()->nodeGeometry().recomputeSize(_nodeId);
 
-        Q_EMIT nodeScene()->toggleEnableNodeWidget(_nodeId);
+        Q_EMIT nodeScene()->graphModel().nodeUpdated(_nodeId);
     }
 
     QGraphicsObject::mousePressEvent(event);
