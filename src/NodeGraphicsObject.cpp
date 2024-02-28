@@ -52,7 +52,8 @@ NodeGraphicsObject::NodeGraphicsObject(BasicGraphicsScene &scene, NodeId nodeId)
 
     setZValue(0);
 
-    embedQWidget();
+    if(_graphModel.nodeData(_nodeId, NodeRole::WidgetEnabled).value<bool>())
+        embedQWidget();
 
     nodeScene()->nodeGeometry().recomputeSize(_nodeId);
 
@@ -83,16 +84,17 @@ void NodeGraphicsObject::embedQWidget()
 
     auto w = _graphModel.nodeData(_nodeId, NodeRole::Widget).value<QWidget *>();
     if (!_proxyWidget && w) {
+        auto size = _graphModel.nodeData(_nodeId, NodeRole::WidgetSize).value<QSize>();
+        if(size.height() && size.width())
+            w->resize(size);
+
         w->show();
 
         _proxyWidget = new QGraphicsProxyWidget(this);
-
         _proxyWidget->setWidget(w);
-
         _proxyWidget->setPreferredWidth(5);
 
-        geometry.setEnableEmbeddedWidget(true);
-
+        geometry.setEnableEmbeddedWidget(_nodeId, true);
         geometry.recomputeSize(_nodeId);
 
         if (w->sizePolicy().verticalPolicy() & QSizePolicy::ExpandFlag) {
@@ -115,13 +117,16 @@ void NodeGraphicsObject::embedQWidget()
 
 void NodeGraphicsObject::unEmbedQWidget()
 {
+    if(auto w = _graphModel.nodeData(_nodeId, NodeRole::Widget).value<QWidget *>())
+        _graphModel.setNodeData(_nodeId, NodeRole::WidgetSize, w->size());
+
     if(_proxyWidget) {
         this->nodeScene()->removeItem(_proxyWidget);
         _proxyWidget->setWidget(nullptr);
         delete _proxyWidget;
         _proxyWidget = nullptr;
         AbstractNodeGeometry &geometry = nodeScene()->nodeGeometry();
-        geometry.setEnableEmbeddedWidget(false);
+        geometry.setEnableEmbeddedWidget(_nodeId, false);
         geometry.recomputeSize(_nodeId);
     }
 }
@@ -256,7 +261,6 @@ void NodeGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event)
         }
 
         nodeScene()->nodeGeometry().recomputeSize(_nodeId);
-
         Q_EMIT nodeScene()->graphModel().nodeUpdated(_nodeId);
     }
 

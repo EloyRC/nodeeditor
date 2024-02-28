@@ -238,6 +238,11 @@ QVariant DataFlowGraphModel::nodeData(NodeId nodeId, NodeRole role) const
     } break;
 
     case NodeRole::WidgetEnabled:
+        result = QVariant::fromValue(true);
+        break;
+
+    case NodeRole::WidgetSize:
+        result = QSize(0,0);
         break;
     }
 
@@ -300,6 +305,9 @@ bool DataFlowGraphModel::setNodeData(NodeId nodeId, NodeRole role, QVariant valu
         break;
 
     case NodeRole::WidgetEnabled:
+        break;
+
+    case NodeRole::WidgetSize:
         break;
     }
 
