@@ -33,7 +33,7 @@ void DefaultHorizontalNodeGeometry::recomputeSize(NodeId const nodeId) const
     unsigned int height = maxVerticalPortsExtent(nodeId);
 
     auto w = _graphModel.nodeData<QWidget *>(nodeId, NodeRole::Widget);
-    if (_embeddedWidgetEnabled && w) {
+    if (_embeddedWidgetEnabled.count(nodeId) && _embeddedWidgetEnabled.at(nodeId) && w) {
         height = std::max(height, static_cast<unsigned int>(w->height()));
     }
 
@@ -50,7 +50,7 @@ void DefaultHorizontalNodeGeometry::recomputeSize(NodeId const nodeId) const
 
     unsigned int width = inPortWidth + outPortWidth + 4 * _portSpasing;
 
-    if (_embeddedWidgetEnabled && w) {
+    if (_embeddedWidgetEnabled.count(nodeId) && _embeddedWidgetEnabled.at(nodeId) && w) {
         width += w->width();
     }
 
@@ -153,7 +153,7 @@ QPointF DefaultHorizontalNodeGeometry::widgetPosition(NodeId const nodeId) const
     unsigned int captionHeight = captionRect(nodeId).height();
 
     auto w = _graphModel.nodeData<QWidget *>(nodeId, NodeRole::Widget);
-    if (_embeddedWidgetEnabled && w) {
+    if (_embeddedWidgetEnabled.count(nodeId) && _embeddedWidgetEnabled.at(nodeId) && w) {
         // If the widget wants to use as much vertical space as possible,
         // place it immediately after the caption.
         if (w->sizePolicy().verticalPolicy() & QSizePolicy::ExpandFlag) {

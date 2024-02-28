@@ -74,13 +74,14 @@ public:
 
     virtual QRect enableWidgetHandleRect(NodeId const nodeId) const = 0;
 
-    void setEnableEmbeddedWidget(bool val)
-    { _embeddedWidgetEnabled = val; }
+    void setEnableEmbeddedWidget(NodeId const nodeId, bool val)
+    { _embeddedWidgetEnabled[nodeId] = val; }
 
 protected:
+
     AbstractGraphModel &_graphModel;
 
-    bool _embeddedWidgetEnabled = true;
+    std::map<NodeId, bool> _embeddedWidgetEnabled;
 
 };
 
