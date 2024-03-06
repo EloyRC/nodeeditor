@@ -275,13 +275,15 @@ void DefaultNodePainter::drawResizeRect(QPainter *painter, NodeGraphicsObject &n
 void DefaultNodePainter::drawEnableWidgetRect(QPainter *painter, NodeGraphicsObject &ngo) const
 {
     NodeId const nodeId = ngo.nodeId();
-    AbstractNodeGeometry &geometry = ngo.nodeScene()->nodeGeometry();
+    if(!ngo.graphModel().nodeData(nodeId, NodeRole::Widget).value<QWidget *>())
+        return;
 
     if(ngo.hasEmbeddedWidget())
         painter->setBrush(Qt::red);
     else
         painter->setBrush(Qt::gray);
         
+    AbstractNodeGeometry &geometry = ngo.nodeScene()->nodeGeometry();
     painter->drawEllipse(geometry.enableWidgetHandleRect(nodeId));
 }
 
